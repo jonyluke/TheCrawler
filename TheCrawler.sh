@@ -64,13 +64,18 @@ RESULT_FILE="$OUTPUT/results.txt"
 python3 "$HOME/ParamSpider/paramspider.py" -d "$DOMAIN" --exclude "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,js,webp,woff2,eot,ttf,otf,mp4,txt" --level high --quiet --subs False > "$PARAMSPIDER_FILE"
 echo "[*] ParamSpider [$(wc -l < "$PARAMSPIDER_FILE")]"
 
-echo "$DOMAIN" | waybackurls > "$WAYBACK_FILE"
+echo "$DOMAIN" | waybackurls -no-subs > "$WAYBACK_FILE"
 echo "[*] Waybackurls [$(wc -l < "$WAYBACK_FILE")]"
 
-echo "$DOMAIN" | gau --subs --blacklist "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,js,webp,woff2,eot,ttf,otf,mp4,txt" > "$GAU_FILE" 2> /dev/null
+echo "$DOMAIN" | gau --blacklist "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,js,webp,woff2,eot,ttf,otf,mp4,txt" > "$GAU_FILE" 2> /dev/null
 echo "[*] Gau [$(wc -l < "$GAU_FILE")]"
 
-echo "$DOMAIN" | hakrawler -d 5 -subs -u > "$HAKRAWLER_FILE"
+
+if [ -n "$COOKIE" ]; then
+    echo "$DOMAIN" | hakrawler -d 5 -u -h "Cookie: $COOKIE" > "$HAKRAWLER_FILE"
+else
+    echo "$DOMAIN" | hakrawler -d 5 -u > "$HAKRAWLER_FILE"
+fi
 
 # Filtrar solo URLs que pertenezcan al dominio base
 grep "$DOMAIN_BASE" "$HAKRAWLER_FILE" > "${HAKRAWLER_FILE}.filtered"
