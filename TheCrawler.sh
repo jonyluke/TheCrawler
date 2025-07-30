@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Veridicación de herramientas instaladas
+for cmd in python3 "$HOME/ParamSpider/paramspider.py" waybackurls gau hakrawler katana gospider uro httpx; do
+    if ! command -v ${cmd%% *} &>/dev/null; then
+        echo "[ERROR] $cmd no está instalado o no está en el PATH."
+        exit 1
+    fi
+done
+
 # Verificación de uso correcto
 DOMAIN="$1"
 COOKIE="$2"
