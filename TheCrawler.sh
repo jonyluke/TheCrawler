@@ -104,8 +104,12 @@ sort -u "$RAW_URLS" | uro > "$VALIDATED_URLS"
 echo "[+] URLs validadas guardadas en $VALIDATED_URLS"
 
 echo "[*] Filtrando URLs activas con httpx..."
-httpx -silent -mc 200,204,301,302,401,403,405,500,502,503,504 -l "$VALIDATED_URLS" >> "$RESULT_FILE"
 
+if [ -n "$COOKIE" ]; then
+    httpx -silent -mc 200,204,301,302,401,403,405,500,502,503,504 -l "$VALIDATED_URLS" -H "Cookie: $COOKIE" >> "$RESULT_FILE"
+else
+    httpx -silent -mc 200,204,301,302,401,403,405,500,502,503,504 -l "$VALIDATED_URLS" >> "$RESULT_FILE"
+fi
 # Filtrar solo las URLs que contengan $DOMAIN_BASE, eliminar duplicados y guardar en archivo limpio
 grep "$DOMAIN_BASE" "$RESULT_FILE" | sort -u > "${RESULT_FILE}.tmp" && mv "${RESULT_FILE}.tmp" "$RESULT_FILE"
 
