@@ -41,7 +41,7 @@ RAW_URLS="$OUTPUT/raw_urls.txt"
 VALIDATED_URLS="$OUTPUT/validated_urls.txt"
 RESULT_FILE="$OUTPUT/results.txt"
 
-python3 "$HOME/ParamSpider/paramspider.py" -d "$DOMAIN" --exclude "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,js,webp,woff2,eot,ttf,otf,mp4,txt" --level high --quiet > "$PARAMSPIDER_FILE"
+python3 "$HOME/ParamSpider/paramspider.py" -d "$DOMAIN" --exclude "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,js,webp,woff2,eot,ttf,otf,mp4,txt" --level high --quiet --subs False > "$PARAMSPIDER_FILE"
 echo "[*] ParamSpider [$(wc -l < "$PARAMSPIDER_FILE")]"
 
 echo "$DOMAIN" | waybackurls > "$WAYBACK_FILE"
