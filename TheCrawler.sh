@@ -1,12 +1,24 @@
 #!/bin/bash
 
-# Veridicación de herramientas instaladas
-for cmd in python3 "$HOME/ParamSpider/paramspider.py" waybackurls gau hakrawler katana gospider uro httpx; do
-    if ! command -v ${cmd%% *} &>/dev/null; then
-        echo "[ERROR] $cmd no está instalado o no está en el PATH."
-        exit 1
-    fi
+# Comprobar que $HOME/go/bin esté en PATH
+if [[ ":$PATH:" != *":$HOME/go/bin:"* ]]; then
+  echo "[ERROR] $HOME/go/bin no está en el PATH."
+  exit 1
+fi
+
+# Comprobar que $HOME/.local/bin esté en PATH
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+  echo "[ERROR] $HOME/.local/bin no está en el PATH."
+  exit 1
+fi
+
+# Comprobar comandos
+for cmd in python3 waybackurls gau hakrawler katana gospider uro httpx; do
+  command -v "$cmd" >/dev/null || { echo "[ERROR] '$cmd' no está instalado o no está en el PATH."; exit 1; }
 done
+
+# Comprobar script específico
+[ -f "$HOME/ParamSpider/paramspider.py" ] || { echo "[ERROR] paramspider.py no se encuentra en $HOME/ParamSpider/"; exit 1; }
 
 # Verificación de uso correcto
 DOMAIN="$1"
