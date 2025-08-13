@@ -67,7 +67,7 @@ echo "[*] ParamSpider [$(wc -l < "$PARAMSPIDER_FILE")]"
 echo "$DOMAIN" | waybackurls > "$WAYBACK_FILE"
 echo "[*] Waybackurls [$(wc -l < "$WAYBACK_FILE")]"
 
-echo "$DOMAIN" | gau --blacklist "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,js,webp,woff2,eot,ttf,otf,mp4,txt" > "$GAU_FILE" 2> /dev/null
+echo "$DOMAIN" | gau --subs --blacklist "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,js,webp,woff2,eot,ttf,otf,mp4,txt" > "$GAU_FILE" 2> /dev/null
 echo "[*] Gau [$(wc -l < "$GAU_FILE")]"
 
 
