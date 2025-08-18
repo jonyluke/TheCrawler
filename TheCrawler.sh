@@ -47,7 +47,7 @@ DOMAIN_BASE=$(echo "$DOMAIN" | sed 's|https\?://||' | cut -d/ -f1)
 DOMAIN_FILE=$(echo "$DOMAIN" | sed 's|https\?://||g' | tr '/' '_')
 
 # Crear carpeta de salida
-OUTPUT="./TheCrawlerOutput/$DOMAIN_FILE"
+OUTPUT="./TheCrawlerOutput$DOMAIN_FILE"
 mkdir -p "$OUTPUT"
 
 # Rutas para salidas individuales
@@ -110,7 +110,7 @@ cat "$PARAMSPIDER_FILE" "$WAYBACK_FILE" "$GAU_FILE" "$HAKRAWLER_FILE" "$KATANA_F
 
 
 # Dedup + normalización con uro
-sort -u "$RAW_URLS" | uro > "$VALIDATED_URLS"
+cat "$RAW_URLS" | sort -u | uro > "$VALIDATED_URLS"
 grep -F "$DOMAIN_BASE" "$VALIDATED_URLS" | sort -u -o "$VALIDATED_URLS"
 
 # subjs  
@@ -126,12 +126,14 @@ else
 fi
 echo "[*] getJS [$(wc -l < "$GETJS_FILE")]"
 
-# Añadir rutas JS detectadas al RAW_URLS y normalizar
+# Añadir rutas JS detectadas al VALIDATED_URLS y normalizar (sin pisarlo)
 cat "$GETJS_FILE" "$SUBJS_FILE" >> "$VALIDATED_URLS"
 
-sort -u "$VALIDATED_URLS" | uro > $VALIDATED_URLS
+tmp_valid=$(mktemp)
+sort -u "$VALIDATED_URLS" | uro > "$tmp_valid" && mv "$tmp_valid" "$VALIDATED_URLS"
 
 echo "[+] URLs validadas guardadas en $VALIDATED_URLS"
+
 
 
 # httpx (filtrado activos)
