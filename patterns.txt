@@ -1,0 +1,62 @@
+# ===== Google =====
+AIza[0-9A-Za-z\-_]{35}
+6L[0-9A-Za-z-_]{38}|^6[0-9a-zA-Z_-]{39}$
+ya29\.[0-9A-Za-z\-_]+
+
+# ===== Amazon AWS =====
+A[SK]IA[0-9A-Z]{16}
+ASIA[0-9A-Z]{16}
+amzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
+s3\.amazonaws.com[/]+|[a-zA-Z0-9_-]*\.s3\.amazonaws.com
+
+# ===== Facebook =====
+EAACEdEose0cBA[0-9A-Za-z]+
+
+# ===== Autenticación =====
+basic\s*[a-zA-Z0-9=:_\+\/-]+
+bearer\s*[a-zA-Z0-9_\-\.=:_\+\/]+
+api[key|\s*]+[a-zA-Z0-9_\-]+
+(?i)(api[_-]?key|secret|token|bearer|authorization|auth[_-]?token|x[-_]api[-_]key|access[_-]?key|client[_-]?secret|private[_-]?key)
+(?i)(passwd|password|pwd|creds|credential)
+
+# ===== Cloud =====
+(?i)(firebase|project[-_ ]id|messagingSenderId|measurementId|gcp|googleapis\.com)
+(?i)(aws|s3|cloudfront|iam|sts)
+(?i)(azure|blob\.core\.windows\.net|tenant|clientId)
+
+# ===== Slack / GitHub =====
+xox[baprs]-[0-9A-Za-z-]{10,}
+(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}
+[a-zA-Z0-9_-]*:[a-zA-Z0-9_\-]+@github\.com*
+
+# ===== Stripe / Square / PayPal =====
+sk_live_[0-9a-zA-Z]{24}
+rk_live_[0-9a-zA-Z]{24}
+sq0csp-[0-9A-Za-z\-_]{43}|sq0[a-z]{3}-[0-9A-Za-z\-_]{22,43}
+sqOatp-[0-9A-Za-z\-_]{22}|EAAA[a-zA-Z0-9]{60}
+access_token\$production\$[0-9a-z]{16}\$[0-9a-f]{32}
+
+# ===== Twilio =====
+SK[0-9a-fA-F]{32}
+AC[a-zA-Z0-9_\-]{32}
+AP[a-zA-Z0-9_\-]{32}
+
+# ===== Mailgun / SendGrid =====
+key-[0-9a-zA-Z]{32}
+SG\.[A-Za-z0-9_\-]{22}\.[A-Za-z0-9_\-]{43}
+
+# ===== JWT =====
+ey[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$
+eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+
+
+# ===== Claves privadas =====
+-----BEGIN RSA PRIVATE KEY-----
+-----BEGIN DSA PRIVATE KEY-----
+-----BEGIN EC PRIVATE KEY-----
+-----BEGIN PGP PRIVATE KEY BLOCK-----
+-----BEGIN (RSA|EC|DSA|PGP|OPENSSH) PRIVATE KEY-----
+
+# ===== Genérico =====
+(secret|api[-_]?key|token|password|passwd|pwd)\s*[:=]\s*["'"'"']?[A-Za-z0-9_\-]{6,}
+Basic\s+[A-Za-z0-9+\/=]{10,}
+Bearer\s+[A-Za-z0-9\._\-]{10,}
