@@ -56,7 +56,6 @@ eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+
 -----BEGIN PGP PRIVATE KEY BLOCK-----
 -----BEGIN (RSA|EC|DSA|PGP|OPENSSH) PRIVATE KEY-----
 
-# ===== Genérico =====
-(secret|api[-_]?key|token|password|passwd|pwd)\s*[:=]\s*["'"'"']?[A-Za-z0-9_\-]{6,}
-Basic\s+[A-Za-z0-9+\/=]{10,}
-Bearer\s+[A-Za-z0-9\._\-]{10,}
+# ===== Genéricos EN + ES =====
+(?i)(api[_-]?key|apikey|clave[_-]?api|secret|secreto|token|bearer|authorization|autorizacion|auth[_-]?token|x[-_]api[-_]key|access[_-]?key|clave[_-]?acceso|client[_-]?secret|clave[_-]?cliente|private[_-]?key|llave[_-]?privada)
+(?i)(passwd|password|contraseña|clave|pwd|creds|credenciales|credential|usuario|user)
