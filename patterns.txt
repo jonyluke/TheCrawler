@@ -12,13 +12,6 @@ s3\.amazonaws.com[/]+|[a-zA-Z0-9_-]*\.s3\.amazonaws.com
 # ===== Facebook =====
 EAACEdEose0cBA[0-9A-Za-z]+
 
-# ===== Autenticación =====
-basic\s*[a-zA-Z0-9=:_\+\/-]+
-bearer\s*[a-zA-Z0-9_\-\.=:_\+\/]+
-api[key|\s*]+[a-zA-Z0-9_\-]+
-(?i)(api[_-]?key|secret|token|bearer|authorization|auth[_-]?token|x[-_]api[-_]key|access[_-]?key|client[_-]?secret|private[_-]?key)
-(?i)(passwd|password|pwd|creds|credential)
-
 # ===== Cloud =====
 (?i)(firebase|project[-_ ]id|messagingSenderId|measurementId|gcp|googleapis\.com)
 (?i)(aws|s3|cloudfront|iam|sts)
