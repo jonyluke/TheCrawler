@@ -12,8 +12,8 @@ if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
   exit 1
 fi
 
-# Comprobar comandos
-for cmd in python3 waybackurls gau hakrawler katana gospider uro httpx; do
+# Comprobar comandos 
+for cmd in python3 waybackurls gau hakrawler katana gospider uro httpx subjs getJS rg; do
   command -v "$cmd" >/dev/null || { echo "[ERROR] '$cmd' no está instalado o no está en el PATH."; exit 1; }
 done
 
@@ -22,7 +22,7 @@ done
 
 # Verificación de uso correcto
 DOMAIN="$1"
-COOKIE="$2"
+COOKIE="${2:-}"
 
 if [ -z "$DOMAIN" ]; then
     echo "Uso: $0 <dominio> [cookie]"
@@ -47,7 +47,7 @@ DOMAIN_BASE=$(echo "$DOMAIN" | sed 's|https\?://||' | cut -d/ -f1)
 DOMAIN_FILE=$(echo "$DOMAIN" | sed 's|https\?://||g' | tr '/' '_')
 
 # Crear carpeta de salida
-OUTPUT="./TheCrawler/$DOMAIN_FILE"
+OUTPUT="./TheCrawlerOutput/$DOMAIN_FILE"
 mkdir -p "$OUTPUT"
 
 # Rutas para salidas individuales
@@ -57,65 +57,145 @@ GAU_FILE="$OUTPUT/gau.txt"
 HAKRAWLER_FILE="$OUTPUT/hakrawler.txt"
 KATANA_FILE="$OUTPUT/katana.txt"
 GOSPIDER_FILE="$OUTPUT/gospider.txt"
+SUBJS_FILE="$OUTPUT/subjs.txt"
+GETJS_FILE="$OUTPUT/getjs.txt"
+JS_PATHS="$OUTPUT/JS_paths.txt"
 RAW_URLS="$OUTPUT/raw_urls.txt"
 VALIDATED_URLS="$OUTPUT/validated_urls.txt"
 RESULT_FILE="$OUTPUT/results.txt"
+SECRETS_FILE="$OUTPUT/secrets.txt"
 
-python3 "$HOME/ParamSpider/paramspider.py" -d "$DOMAIN" --exclude "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,js,webp,woff2,eot,ttf,otf,mp4,txt" --level high --quiet --subs False -o "$PARAMSPIDER_FILE"
+# ParamSpider
+python3 "$HOME/ParamSpider/paramspider.py" -d "$DOMAIN" --exclude "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,webp,woff2,eot,ttf,otf,mp4" --level high --quiet --subs False -o "$PARAMSPIDER_FILE"
 echo "[*] ParamSpider [$(wc -l < "$PARAMSPIDER_FILE")]"
 
+# Waybackurls
 echo "$DOMAIN" | waybackurls > "$WAYBACK_FILE"
 echo "[*] Waybackurls [$(wc -l < "$WAYBACK_FILE")]"
 
-echo "$DOMAIN" | gau --subs --blacklist "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,js,webp,woff2,eot,ttf,otf,mp4,txt" > "$GAU_FILE" 2> /dev/null
+# gau
+echo "$DOMAIN" | gau --subs --blacklist "png,jpg,gif,jpeg,swf,woff,svg,json,css,webp,woff2,eot,ttf,otf,mp4" > "$GAU_FILE" 2>/dev/null
 echo "[*] Gau [$(wc -l < "$GAU_FILE")]"
 
-
+# hakrawler
 if [ -n "$COOKIE" ]; then
     echo "$DOMAIN" | hakrawler -d 5 -u -h "Cookie: $COOKIE" > "$HAKRAWLER_FILE"
 else
     echo "$DOMAIN" | hakrawler -d 5 -u > "$HAKRAWLER_FILE"
 fi
-
-# Filtrar solo URLs que pertenezcan al dominio base
-grep "$DOMAIN_BASE" "$HAKRAWLER_FILE" > "${HAKRAWLER_FILE}.filtered"
+grep -F "$DOMAIN_BASE" "$HAKRAWLER_FILE" > "${HAKRAWLER_FILE}.filtered" || true
 mv "${HAKRAWLER_FILE}.filtered" "$HAKRAWLER_FILE"
-
 echo "[*] Hakrawler [$(wc -l < "$HAKRAWLER_FILE")]"
 
-
+# katana
 if [ -n "$COOKIE" ]; then
     katana -u "$DOMAIN" -d 5 -jc -jsl -kf all -silent -H "Cookie: $COOKIE" -fs fqdn > "$KATANA_FILE"
 else
     katana -u "$DOMAIN" -d 5 -jc -jsl -kf all -silent -fs fqdn > "$KATANA_FILE"
 fi
-
 echo "[*] Katana [$(wc -l < "$KATANA_FILE")]"
 
-
+# gospider
 if [ -n "$COOKIE" ]; then
-    gospider -s "$DOMAIN" -c 10 -d 5 -t 20 --blacklist ".(jpg|jpeg|gif|css|tif|tiff|png|ttf|woff|woff2|ico|pdf|svg|txt)" --other-source --cookie "$COOKIE" | grep -e "code-200" | awk '{print $5}' > "$GOSPIDER_FILE"
+    gospider -s "$DOMAIN" -c 10 -d 5 -t 20 --blacklist ".(jpg|jpeg|gif|css|tif|tiff|png|ttf|woff|woff2|ico|svg)" --other-source --cookie "$COOKIE" \
+      | grep -e "code-200" | awk '{print $5}' > "$GOSPIDER_FILE"
 else
-    gospider -s "$DOMAIN" -c 10 -d 5 -t 20 --blacklist ".(jpg|jpeg|gif|css|tif|tiff|png|ttf|woff|woff2|ico|pdf|svg|txt)" --other-source | grep -e "code-200" | awk '{print $5}' > "$GOSPIDER_FILE"
+    gospider -s "$DOMAIN" -c 10 -d 5 -t 20 --blacklist ".(jpg|jpeg|gif|css|tif|tiff|png|ttf|woff|woff2|ico|svg)" --other-source \
+      | grep -e "code-200" | awk '{print $5}' > "$GOSPIDER_FILE"
 fi
 echo "[*] Gospider [$(wc -l < "$GOSPIDER_FILE")]"
 
-
+# Combinar primeras fuentes
 cat "$PARAMSPIDER_FILE" "$WAYBACK_FILE" "$GAU_FILE" "$HAKRAWLER_FILE" "$KATANA_FILE" "$GOSPIDER_FILE" > "$RAW_URLS"
-echo "[+] URLs combinadas guardadas en $RAW_URLS"
 
-echo "[*] Ordenando, deduplicando y filtrando URLs con uro..."
+
+# Dedup + normalización con uro
 sort -u "$RAW_URLS" | uro > "$VALIDATED_URLS"
+grep -F "$DOMAIN_BASE" "$VALIDATED_URLS" | sort -u -o "$VALIDATED_URLS"
+
+# subjs  
+cat "$VALIDATED_URLS" | subjs > "$SUBJS_FILE"
+echo "[*] subJS [$(wc -l < "$SUBJS_FILE")]"
+
+
+# getJS
+if [ -n "$COOKIE" ]; then
+  cat "$VALIDATED_URLS" | getJS -complete -header "Cookie: $COOKIE" > "$GETJS_FILE"
+else
+  cat "$VALIDATED_URLS" | getJS -complete > "$GETJS_FILE"
+fi
+echo "[*] getJS [$(wc -l < "$GETJS_FILE")]"
+
+# Añadir rutas JS detectadas al RAW_URLS y normalizar
+cat "$GETJS_FILE" "$SUBJS_FILE" >> "$VALIDATED_URLS"
+
+sort -u "$VALIDATED_URLS" | uro > $VALIDATED_URLS
+
 echo "[+] URLs validadas guardadas en $VALIDATED_URLS"
 
-echo "[*] Filtrando URLs activas con httpx..."
 
+# httpx (filtrado activos)
 if [ -n "$COOKIE" ]; then
     httpx -silent -mc 200,204,301,302,401,403,405,500,502,503,504 -l "$VALIDATED_URLS" -H "Cookie: $COOKIE" >> "$RESULT_FILE"
 else
     httpx -silent -mc 200,204,301,302,401,403,405,500,502,503,504 -l "$VALIDATED_URLS" >> "$RESULT_FILE"
 fi
-# Filtrar solo las URLs que contengan $DOMAIN_BASE, eliminar duplicados y guardar en archivo limpio
-grep "$DOMAIN_BASE" "$RESULT_FILE" | sort -u > "${RESULT_FILE}.tmp" && mv "${RESULT_FILE}.tmp" "$RESULT_FILE"
-
 echo "[+] URLs activas guardadas en $RESULT_FILE"
+
+sort -u "$RESULT_FILE" -o "$RESULT_FILE"
+
+# Extraer solo rutas .js interesantes a JS_PATHS
+grep -Ei '\.js([?#].*)?$' "$RESULT_FILE" \
+  | grep -Evi '(jquery|bootstrap|react(\.min)?\.js|vue(\.min)?\.js|angular(\.min)?\.js|moment(\.min)?\.js|lodash(\.min)?\.js|modernizr(\.min)?\.js)' \
+  > "$JS_PATHS"
+
+# Descargar JS (nombre = ruta_sin_dominio + MD5 del contenido)
+mkdir -p "$OUTPUT/js_files"
+
+# Contar total de JS a descargar
+TOTAL=$(grep -c . "$JS_PATHS")
+COUNT=0
+
+while read -r url; do
+    [ -z "$url" ] && continue
+    COUNT=$((COUNT+1))
+
+    # Mostrar progreso en la misma línea
+    printf "\r[*] Descargando JS [%d/%d]" "$COUNT" "$TOTAL"
+
+    # Ruta sin dominio
+    path_only=$(echo "$url" | sed -E 's|https?://[^/]+||')
+    clean=$(echo "$path_only" | sed 's|^/||' | tr "/:?&=%#| \t" "_")
+
+    tmpfile=$(mktemp)
+    if [ -n "$COOKIE" ]; then
+        curl -skLf --compressed -H "Cookie: $COOKIE" "$url" -o "$tmpfile"
+    else
+        curl -skLf --compressed "$url" -o "$tmpfile"
+    fi
+
+    if [ -s "$tmpfile" ]; then
+        hash=$(md5sum "$tmpfile" | awk '{print $1}')
+        outfile="$OUTPUT/js_files/${clean}_${hash}.js"
+        mv "$tmpfile" "$outfile"
+    else
+        rm -f "$tmpfile"
+    fi
+done < "$JS_PATHS"
+
+# Salto de línea después del progreso
+echo
+
+echo "[+] Archivos JS descargados en $OUTPUT/js_files"
+
+# Buscar secretos en archivos JS usando patrones externos
+if command -v rg >/dev/null 2>&1; then
+  rg -nH --no-heading --color never -a -S -P \
+    -g '!**/*.map' -g '!**/*.js.map' -g '*.js' \
+    -f patterns.txt \
+    "$OUTPUT/js_files" > "$SECRETS_FILE"
+fi
+
+[ -s "$SECRETS_FILE" ] && sort -u "$SECRETS_FILE" -o "$SECRETS_FILE"
+
+echo "[*] Secrets [$(wc -l < "$SECRETS_FILE")]"
