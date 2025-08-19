@@ -15,7 +15,7 @@ sudo apt install nuclei golang ripgrep && git clone https://github.com/0xKayala/
 
 ### XSS
 ```
-grep '=' TheCrawler/domain.com/results.txt | dalfox pipe --skip-mining-all --force-headless-verification -S -C "user_session=qUQV0tPNlvAn" 
+grep '=' TheCrawler/domain.com/results.txt | dalfox pipe --fast-scan --skip-mining-all --force-headless-verification -S -C "user_session=qUQV0tPNlvAn" 
 ```
 
 ```
