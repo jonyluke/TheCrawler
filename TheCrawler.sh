@@ -126,14 +126,13 @@ else
 fi
 echo "[*] getJS [$(wc -l < "$GETJS_FILE")]"
 
-# Añadir rutas JS detectadas al VALIDATED_URLS y normalizar (sin pisarlo)
+# Añadir rutas JS detectadas al VALIDATED_URLS y normalizar
 cat "$GETJS_FILE" "$SUBJS_FILE" >> "$VALIDATED_URLS"
 
 tmp_valid=$(mktemp)
-sort -u "$VALIDATED_URLS" | uro > "$tmp_valid" && mv "$tmp_valid" "$VALIDATED_URLS"
+grep -F "$DOMAIN_BASE" "$VALIDATED_URLS"  | sort -u | uro > "$tmp_valid" && mv "$tmp_valid" "$VALIDATED_URLS"
 
 echo "[+] URLs validadas guardadas en $VALIDATED_URLS"
-
 
 
 # httpx (filtrado activos)
@@ -147,9 +146,16 @@ echo "[+] URLs activas guardadas en $RESULT_FILE"
 sort -u "$RESULT_FILE" -o "$RESULT_FILE"
 
 # Extraer solo rutas .js interesantes a JS_PATHS
-grep -Ei '\.js([?#].*)?$' "$RESULT_FILE" \
-  | grep -Evi '(jquery|bootstrap|react(\.min)?\.js|vue(\.min)?\.js|angular(\.min)?\.js|moment(\.min)?\.js|lodash(\.min)?\.js|modernizr(\.min)?\.js|datatables(\.min)?\.js|jsrender(\.min)?\.js|json2(\.min)?\.js|prototype(\.min)?\.js|deployJava\.js|HackTimer(?:Worker)?\.js|recaptcha(?:_api)?\.js|ion\.rangeSlider(\.min)?\.js|iziModal(\.min)?\.js)' \
-  > "$JS_PATHS"
+awk -v IGNORECASE=1 '{
+  u=$0; sub(/[?#].*$/,"",u)
+  h=""; p=u
+  if (match(u,/^https?:\/\/[^\/]+/)) { h=substr(u,RSTART,RLENGTH); p=substr(u,RSTART+RLENGTH) }
+  gsub(/\/+/, "/", p)                
+  u=h p
+  f=p; sub(/^.*\//,"",f)              # filename
+  if (f~/\.js$/ && f!~/(jquery|bootstrap|react(-dom)?|vue|angular|moment|lodash|underscore|modernizr|dataTables?|jsrender|json2|prototype|deployjava|hacktimer|recaptcha|ion[.-]?rangeslider|izi?modal)/ && !s[u]++) print u
+}' "$RESULT_FILE" > "$JS_PATHS"
+
 
 # Descargar JS (nombre = ruta_sin_dominio + MD5 del contenido)
 mkdir -p "$OUTPUT/js_files"
