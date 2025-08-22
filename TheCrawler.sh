@@ -47,7 +47,7 @@ DOMAIN_BASE=$(echo "$DOMAIN" | sed 's|https\?://||' | cut -d/ -f1)
 DOMAIN_FILE=$(echo "$DOMAIN" | sed 's|https\?://||g' | tr '/' '_')
 
 # Crear carpeta de salida
-OUTPUT="./TheCrawlerOutput$DOMAIN_FILE"
+OUTPUT="./output/$DOMAIN_FILE"
 mkdir -p "$OUTPUT"
 
 # Rutas para salidas individuales
@@ -148,7 +148,7 @@ sort -u "$RESULT_FILE" -o "$RESULT_FILE"
 
 # Extraer solo rutas .js interesantes a JS_PATHS
 grep -Ei '\.js([?#].*)?$' "$RESULT_FILE" \
-  | grep -Evi '(jquery|bootstrap|react(\.min)?\.js|vue(\.min)?\.js|angular(\.min)?\.js|moment(\.min)?\.js|lodash(\.min)?\.js|modernizr(\.min)?\.js)' \
+  | grep -Evi '(jquery|bootstrap|react(\.min)?\.js|vue(\.min)?\.js|angular(\.min)?\.js|moment(\.min)?\.js|lodash(\.min)?\.js|modernizr(\.min)?\.js|datatables(\.min)?\.js|jsrender(\.min)?\.js|json2(\.min)?\.js|prototype(\.min)?\.js|deployJava\.js|HackTimer(?:Worker)?\.js|recaptcha(?:_api)?\.js|ion\.rangeSlider(\.min)?\.js|iziModal(\.min)?\.js)' \
   > "$JS_PATHS"
 
 # Descargar JS (nombre = ruta_sin_dominio + MD5 del contenido)
@@ -165,9 +165,7 @@ while read -r url; do
     # Mostrar progreso en la misma línea
     printf "\r[*] Descargando JS [%d/%d]" "$COUNT" "$TOTAL"
 
-    # Ruta sin dominio
-    path_only=$(echo "$url" | sed -E 's|https?://[^/]+||')
-    clean=$(echo "$path_only" | sed 's|^/||' | tr "/:?&=%#| \t" "_")
+    base=$(basename "$(echo "$url" | sed -E 's/[?#].*$//')")
 
     tmpfile=$(mktemp)
     if [ -n "$COOKIE" ]; then
@@ -178,7 +176,7 @@ while read -r url; do
 
     if [ -s "$tmpfile" ]; then
         hash=$(md5sum "$tmpfile" | awk '{print $1}')
-        outfile="$OUTPUT/js_files/${clean}_${hash}.js"
+        outfile="$OUTPUT/js_files/${hash}_${base}"
         mv "$tmpfile" "$outfile"
     else
         rm -f "$tmpfile"
