@@ -24,7 +24,7 @@ xsstrike --seeds <(grep '=' TheCrawler/domain.com/results.txt)
 
 ### Nuclei
 ```
-cat TheCrawler/domain.com/results.txt | nuclei -t /home/kali/.local/nuclei-templates -dast -H "Cookie: sessionid=abc123;"
+cat TheCrawler/domain.com/results.txt | nuclei -dast -H "Cookie: sessionid=abc123;"
 ```
 ### Open Redirection
 ```
