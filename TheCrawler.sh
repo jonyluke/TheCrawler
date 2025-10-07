@@ -197,13 +197,14 @@ echo
 echo "[+] Archivos JS descargados en $OUTPUT/js_files"
 
 # Buscar secretos en archivos JS usando patrones externos
-if command -v rg >/dev/null 2>&1; then
-  rg -nH --no-heading --color never -a -S -P \
-    -g '!**/*.map' -g '!**/*.js.map' -g '*.js' \
-    -f patterns.txt \
-    "$OUTPUT/js_files" > "$SECRETS_FILE"
-fi
 
-[ -s "$SECRETS_FILE" ] && sort -u "$SECRETS_FILE" -o "$SECRETS_FILE"
+#if command -v rg >/dev/null 2>&1; then
+#  rg -nH --no-heading --color never -a -S -P \
+#    -g '!**/*.map' -g '!**/*.js.map' -g '*.js' \
+#    -f patterns.txt \
+#    "$OUTPUT/js_files" > "$SECRETS_FILE"
+#fi
 
-echo "[*] Secrets [$(wc -l < "$SECRETS_FILE")]"
+#[ -s "$SECRETS_FILE" ] && sort -u "$SECRETS_FILE" -o "$SECRETS_FILE"
+
+#echo "[*] Secrets [$(wc -l < "$SECRETS_FILE")]"
