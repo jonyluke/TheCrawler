@@ -67,7 +67,7 @@ SECRETS_FILE="$OUTPUT/secrets.txt"
 
 # ParamSpider
 source "$HOME/ParamSpider/.venv/bin/activate"
-python3 "$HOME/ParamSpider/paramspider.py" -d "$DOMAIN" --exclude "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,webp,woff2,eot,ttf,otf,mp4" --level high --quiet --subs False -o "$PARAMSPIDER_FILE"
+python3 "$HOME/ParamSpider/paramspider.py" -d "$DOMAIN_BASE" --exclude "png,jpg,gif,jpeg,swf,woff,svg,pdf,json,css,webp,woff2,eot,ttf,otf,mp4" --level high --quiet --subs False -o "$PARAMSPIDER_FILE"
 deactivate
 echo "[*] ParamSpider [$(wc -l < "$PARAMSPIDER_FILE")]"
 
