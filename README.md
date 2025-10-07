@@ -18,10 +18,6 @@ sudo apt install nuclei golang ripgrep && git clone https://github.com/0xKayala/
 grep '=' TheCrawler/domain.com/results.txt | dalfox pipe --fast-scan --skip-mining-all -S -C "user_session=qUQV0tPNlvAn" 
 ```
 
-```
-xsstrike --seeds <(grep '=' TheCrawler/domain.com/results.txt)
-```
-
 ### Nuclei
 ```
 cat TheCrawler/domain.com/results.txt | nuclei -dast -H "Cookie: sessionid=abc123;"
